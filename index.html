@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>PDFカンペ変換ツール</title>
+  <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
+  <style>
+    body {
+      font-family: 'Helvetica Neue', sans-serif;
+      background: linear-gradient(to right, #f8f9fa, #e9ecef);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 50px;
+      color: #343a40;
+    }
+
+    h1 {
+      font-size: 2em;
+      margin-bottom: 0.5em;
+      color: #212529;
+    }
+
+    p {
+      font-size: 1.1em;
+      max-width: 600px;
+      text-align: center;
+      margin-bottom: 2em;
+      line-height: 1.6;
+    }
+
+    input[type="file"] {
+      font-size: 1em;
+      padding: 10px;
+      border: 1px solid #ced4da;
+      border-radius: 5px;
+      background-color: #fff;
+      margin-bottom: 1.5em;
+      width: 300px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    button {
+      padding: 12px 24px;
+      font-size: 1em;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    a {
+      display: inline-block;
+      margin-top: 2em;
+      text-decoration: none;
+      background-color: #28a745;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 1em;
+      transition: background-color 0.3s ease;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    a:hover {
+      background-color: #218838;
+    }
+  </style>
+</head>
+<body>
+  <h1>PDFカンペ変換ツール</h1>
+  <p>
+    PDFを見開きカンペに変換します。<br>
+    変換後、ファイルを<strong>短辺見開きで両面印刷</strong>してください。
+  </p>
+  <input type="file" id="fileInput" accept="application/pdf">
+  <button id="convertBtn">変換実行</button>
+  <a id="downloadLink" download="変換後.pdf">変換後PDFをダウンロード</a>
+
+  <script>
+    document.getElementById("convertBtn").addEventListener("click", async () => {
+      const fileInput = document.getElementById("fileInput");
+      const downloadLink = document.getElementById("downloadLink");
+
+      if (!fileInput.files[0]) {
+        alert("PDFファイルを選択してください。");
+        return;
+      }
+
+      const fileBuffer = await fileInput.files[0].arrayBuffer();
+      const inputPdf = await PDFLib.PDFDocument.load(fileBuffer);
+      const totalPages = inputPdf.getPageCount();
+      const outputPdf = await PDFLib.PDFDocument.create();
+
+      const copiedPages = await outputPdf.copyPages(inputPdf, [...Array(totalPages).keys()]);
+      const pageMap = {};
+      copiedPages.forEach((page, i) => {
+        const pageNum = i + 1;
+        if (pageNum % 2 === 1) {
+          page.setRotation(PDFLib.degrees(180));
+        }
+        pageMap[pageNum] = page;
+      });
+
+      const newPages = [];
+
+      const page2 = pageMap[2];
+      delete pageMap[2];
+      newPages.push(page2);
+
+      const { width, height } = page2.getSize();
+      const blank = outputPdf.addPage([width, height]);
+      outputPdf.removePage(outputPdf.getPageCount() - 1);
+      newPages.push(blank);
+
+      for (let i = 1; i <= totalPages; i += 4) {
+        if (i !== 2 && pageMap[i])     newPages.push(pageMap[i]);
+        if (pageMap[i + 3]) newPages.push(pageMap[i + 3]);
+        if (pageMap[i + 2]) newPages.push(pageMap[i + 2]);
+        if (pageMap[i + 5]) newPages.push(pageMap[i + 5]);
+      }
+
+      newPages.forEach(p => outputPdf.addPage(p));
+
+      const pdfBytes = await outputPdf.save();
+      const blob = new Blob([pdfBytes], { type: "application/pdf" });
+      const url = URL.createObjectURL(blob);
+
+      downloadLink.href = url;
+      downloadLink.style.display = "inline-block";
+      downloadLink.click();
+    });
+  </script>
+</body>
+</html>
