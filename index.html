@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>PDFカンペ変換ツール</title>
+  <title>PDFカンペ変換</title>
   <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
   <style>
     body {
@@ -82,7 +82,7 @@
   </p>
   <input type="file" id="fileInput" accept="application/pdf">
   <button id="convertBtn">変換実行</button>
-  <a id="downloadLink" download="変換後.pdf">変換後PDFをダウンロード</a>
+  <a id="downloadLink" download="processed.pdf">変換後PDFをダウンロード</a>
 
   <script>
     document.getElementById("convertBtn").addEventListener("click", async () => {
