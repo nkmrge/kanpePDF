@@ -104,29 +104,40 @@
       copiedPages.forEach((page, i) => {
         const pageNum = i + 1;
         if (pageNum % 2 === 1) {
-          page.setRotation(PDFLib.degrees(180));
+          page.setRotation(PDFLib.degrees(180)); // 奇数ページを回転
         }
         pageMap[pageNum] = page;
       });
 
       const newPages = [];
 
+      // 空白ページを2ページ目の前に追加
       const page2 = pageMap[2];
-      delete pageMap[2];
-      newPages.push(page2);
-
       const { width, height } = page2.getSize();
-      const blank = outputPdf.addPage([width, height]);
-      outputPdf.removePage(outputPdf.getPageCount() - 1);
-      newPages.push(blank);
+      const blankBefore2 = outputPdf.addPage([width, height]);
+      outputPdf.removePage(outputPdf.getPageCount() - 1); // 仮追加 → 削除して使い回し
+      newPages.push(blankBefore2);   // 空白
+      newPages.push(page2);          // 2ページ目
 
+      // その他のページ：1,4,3,6,5,...（ただし2以外）
+      const used = new Set([2]);
       for (let i = 1; i <= totalPages; i += 4) {
-        if (i !== 2 && pageMap[i])     newPages.push(pageMap[i]);
-        if (pageMap[i + 3]) newPages.push(pageMap[i + 3]);
-        if (pageMap[i + 2]) newPages.push(pageMap[i + 2]);
-        if (pageMap[i + 5]) newPages.push(pageMap[i + 5]);
+        if (i !== 2 && pageMap[i])     { newPages.push(pageMap[i]); used.add(i); }
+        if (pageMap[i + 3])            { newPages.push(pageMap[i + 3]); used.add(i + 3); }
+        if (pageMap[i + 2])            { newPages.push(pageMap[i + 2]); used.add(i + 2); }
+        if (pageMap[i + 5])            { newPages.push(pageMap[i + 5]); used.add(i + 5); }
       }
 
+      // 元のページ数が奇数の場合、最後に空白ページを追加
+      if (totalPages % 2 === 1) {
+        const lastRef = copiedPages[copiedPages.length - 1];
+        const { width, height } = lastRef.getSize();
+        const blankEnd = outputPdf.addPage([width, height]);
+        outputPdf.removePage(outputPdf.getPageCount() - 1);
+        newPages.splice(newPages.length - 1, 0, blankEnd); // 最後のページの直前に挿入
+      }
+
+      // 最終出力に追加
       newPages.forEach(p => outputPdf.addPage(p));
 
       const pdfBytes = await outputPdf.save();
