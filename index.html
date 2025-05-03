@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>便利ツール Launcher</title>
+  <style>
+    /* 基本レイアウト */
+    body {
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      font-family: "Helvetica Neue", Arial, sans-serif;
+      background: #f5f7fa;
+    }
+
+    /* 見出し */
+    h1 {
+      margin-bottom: 2rem;
+      font-size: 1.8rem;
+      color: #333;
+    }
+
+    /* ボタン共通スタイル */
+    .tool-btn {
+      display: inline-block;
+      width: 260px;
+      padding: 16px 24px;
+      margin: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      text-align: center;
+      color: #fff;
+      background: #007bff;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: background .25s;
+      box-shadow: 0 4px 6px rgba(0,0,0,.1);
+    }
+    .tool-btn:hover {
+      background: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <h1>便利ツール Launcher</h1>
+
+  <!-- カンペ見開き変換 -->
+  <a class="tool-btn"
+     href="https://nkmrge.github.io/kanpePDF/kanpe-henkan.html"
+     target="_blank"                  <!-- 新しいタブで開きたい場合 -->
+     rel="noopener noreferrer">
+     カンペ見開き変換
+  </a>
+
+  <!-- PDF圧縮ツール -->
+  <a class="tool-btn"
+     href="https://nkmrge.github.io/PDFcompress"
+     target="_blank"
+     rel="noopener noreferrer">
+     PDF圧縮ツール
+  </a>
+</body>
+</html>
