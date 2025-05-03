@@ -4,73 +4,91 @@
   <meta charset="UTF-8">
   <title>PDFカンペ変換</title>
   <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
+
   <style>
-    body {
-      font-family: 'Helvetica Neue', sans-serif;
-      background: linear-gradient(to right, #f8f9fa, #e9ecef);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 50px;
-      color: #343a40;
+    /* ===== カラーパレット ===== */
+    :root{
+      --accent:   #7ab8ff;   /* 明るいブルー */
+      --accent-h: #519cff;   /* ホバー濃色  */
+      --bg1:      #eaf5ff;   /* 背景グラデ1 */
+      --bg2:      #d5eaff;   /* 背景グラデ2 */
+      --text:     #1e1e1e;
+      --border:   #bcd8ff;
     }
 
-    h1 {
-      font-size: 2em;
-      margin-bottom: 0.5em;
-      color: #212529;
+    body{
+      font-family:"SF Pro Text","Helvetica Neue",sans-serif;
+      background:linear-gradient(145deg,var(--bg1) 0%,var(--bg2) 100%);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      padding:50px;
+      color:var(--text);
     }
 
-    p {
-      font-size: 1.1em;
-      max-width: 600px;
-      text-align: center;
-      margin-bottom: 2em;
-      line-height: 1.6;
+    h1{
+      font-size:2em;
+      margin-bottom:.5em;
+      color:var(--text);
     }
 
-    input[type="file"] {
-      font-size: 1em;
-      padding: 10px;
-      border: 1px solid #ced4da;
-      border-radius: 5px;
-      background-color: #fff;
-      margin-bottom: 1.5em;
-      width: 300px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    p{
+      font-size:1.1em;
+      max-width:600px;
+      text-align:center;
+      margin-bottom:2em;
+      line-height:1.6;
     }
 
-    button {
-      padding: 12px 24px;
-      font-size: 1em;
-      background-color: #007bff;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    /* ファイル選択 */
+    input[type="file"]{
+      font-size:1em;
+      padding:10px;
+      border:1px solid var(--border);
+      border-radius:6px;
+      background:#fff;
+      margin-bottom:1.5em;
+      width:300px;
+      box-shadow:0 2px 4px rgba(0,0,0,.05);
     }
 
-    button:hover {
-      background-color: #0056b3;
+    /* ボタン */
+    button{
+      padding:12px 24px;
+      font-size:1em;
+      background:var(--accent);
+      color:#fff;
+      border:none;
+      border-radius:10px;
+      cursor:pointer;
+      transition:background .25s ease,transform .25s ease;
+      box-shadow:
+        0 2px 4px rgba(0,0,0,.12),
+        0 6px 12px rgba(0,0,0,.08) inset;
+    }
+    button:hover{
+      background:var(--accent-h);
+      transform:translateY(-1px);
     }
 
-    a {
-      display: inline-block;
-      margin-top: 2em;
-      text-decoration: none;
-      background-color: #28a745;
-      color: white;
-      padding: 12px 24px;
-      border-radius: 8px;
-      font-size: 1em;
-      transition: background-color 0.3s ease;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    /* ダウンロードリンク */
+    a{
+      display:inline-block;
+      margin-top:2em;
+      text-decoration:none;
+      background:var(--accent);
+      color:#fff;
+      padding:12px 24px;
+      border-radius:10px;
+      font-size:1em;
+      transition:background .25s ease,transform .25s ease;
+      box-shadow:
+        0 2px 4px rgba(0,0,0,.12),
+        0 6px 12px rgba(0,0,0,.08) inset;
     }
-
-    a:hover {
-      background-color: #218838;
+    a:hover{
+      background:var(--accent-h);
+      transform:translateY(-1px);
     }
   </style>
 </head>
@@ -80,13 +98,14 @@
     PDFカンペを見開きカンペに変換します。<br>
     変換後、ファイルを<strong>短辺見開きで両面印刷</strong>してください。
   </p>
+
   <input type="file" id="fileInput" accept="application/pdf">
   <button id="convertBtn">変換実行</button>
-  <a id="downloadLink">変換後PDFをダウンロード</a>
+  <a id="downloadLink" style="display:none;">変換後PDFをダウンロード</a>
 
   <script>
     document.getElementById("convertBtn").addEventListener("click", async () => {
-      const fileInput = document.getElementById("fileInput");
+      const fileInput    = document.getElementById("fileInput");
       const downloadLink = document.getElementById("downloadLink");
 
       if (!fileInput.files[0]) {
@@ -94,56 +113,52 @@
         return;
       }
 
-      const originalFileName = fileInput.files[0].name.replace(/\.pdf$/i, '');
+      const originalFileName = fileInput.files[0].name.replace(/\.pdf$/i,'');
       const fileBuffer = await fileInput.files[0].arrayBuffer();
-      const inputPdf = await PDFLib.PDFDocument.load(fileBuffer);
+      const inputPdf   = await PDFLib.PDFDocument.load(fileBuffer);
       const totalPages = inputPdf.getPageCount();
-      const outputPdf = await PDFLib.PDFDocument.create();
+      const outputPdf  = await PDFLib.PDFDocument.create();
 
-      const copiedPages = await outputPdf.copyPages(inputPdf, [...Array(totalPages).keys()]);
-      const pageMap = {};
-      copiedPages.forEach((page, i) => {
-        const pageNum = i + 1;
-        if (pageNum % 2 === 1) {
-          page.setRotation(PDFLib.degrees(180));
-        }
-        pageMap[pageNum] = page;
+      /* === ページコピー & 並び替え === */
+      const copied = await outputPdf.copyPages(inputPdf,[...Array(totalPages).keys()]);
+      const pageMap={};
+      copied.forEach((pg,i)=>{
+        const n=i+1;
+        if(n%2===1) pg.setRotation(PDFLib.degrees(180));
+        pageMap[n]=pg;
       });
 
-      const newPages = [];
-
-      // 空白ページを2ページ目の前に追加
-      const page2 = pageMap[2];
-      const { width, height } = page2.getSize();
-      const blankBefore2 = outputPdf.addPage([width, height]);
-      outputPdf.removePage(outputPdf.getPageCount() - 1);
-      newPages.push(blankBefore2);
-      newPages.push(page2);
-      const used = new Set([2]);
-
-      for (let i = 1; i <= totalPages; i += 4) {
-        if (i !== 2 && pageMap[i])     { newPages.push(pageMap[i]); used.add(i); }
-        if (pageMap[i + 3])            { newPages.push(pageMap[i + 3]); used.add(i + 3); }
-        if (pageMap[i + 2])            { newPages.push(pageMap[i + 2]); used.add(i + 2); }
-        if (pageMap[i + 5])            { newPages.push(pageMap[i + 5]); used.add(i + 5); }
+      const stack=[];
+      /* 空白ページを2ページ目前に挿入 */
+      {
+        const {width,height}=pageMap[2].getSize();
+        const blank=outputPdf.addPage([width,height]);
+        outputPdf.removePage(outputPdf.getPageCount()-1);
+        stack.push(blank,pageMap[2]);
       }
-
-      if (totalPages % 2 === 1) {
-        const lastRef = copiedPages[copiedPages.length - 1];
-        const { width, height } = lastRef.getSize();
-        const blankEnd = outputPdf.addPage([width, height]);
-        outputPdf.removePage(outputPdf.getPageCount() - 1);
-        newPages.splice(newPages.length - 1, 0, blankEnd);
+      const used=new Set([2]);
+      for(let i=1;i<=totalPages;i+=4){
+        if(i!==2&&pageMap[i])      {stack.push(pageMap[i]);     used.add(i);}
+        if(pageMap[i+3])           {stack.push(pageMap[i+3]);   used.add(i+3);}
+        if(pageMap[i+2])           {stack.push(pageMap[i+2]);   used.add(i+2);}
+        if(pageMap[i+5])           {stack.push(pageMap[i+5]);   used.add(i+5);}
       }
+      if(totalPages%2===1){
+        const lastPg=copied[copied.length-1];
+        const {width,height}=lastPg.getSize();
+        const blank=outputPdf.addPage([width,height]);
+        outputPdf.removePage(outputPdf.getPageCount()-1);
+        stack.splice(stack.length-1,0,blank);
+      }
+      stack.forEach(p=>outputPdf.addPage(p));
 
-      newPages.forEach(p => outputPdf.addPage(p));
-
+      /* === 出力 === */
       const pdfBytes = await outputPdf.save();
-      const blob = new Blob([pdfBytes], { type: "application/pdf" });
-      const url = URL.createObjectURL(blob);
+      const blob     = new Blob([pdfBytes],{type:"application/pdf"});
+      const url      = URL.createObjectURL(blob);
 
-      downloadLink.href = url;
-      downloadLink.download = `${originalFileName}_processed.pdf`;
+      downloadLink.href      = url;
+      downloadLink.download  = `${originalFileName}_processed.pdf`;
       downloadLink.style.display = "inline-block";
       downloadLink.click();
     });
