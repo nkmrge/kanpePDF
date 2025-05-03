@@ -1,65 +1,100 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>便利ツール Launcher</title>
-  <style>
-    /* 基本レイアウト */
-    body {
-      margin: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      font-family: "Helvetica Neue", Arial, sans-serif;
-      background: #f5f7fa;
-    }
+<meta charset="UTF-8">
+<title>便利ツール Launcher</title>
+<style>
+  /* ===== 配色・フォント ===== */
+  :root {
+    --accent:  #7ab8ff;   /* パステルブルー（ボタン） */
+    --accent-h:#519cff;   /* ホバー濃色        */
+    --text:    #1e1e1e;
+    --glass-bg:rgba(255,255,255,0.55); /* ガラス風カード */
+  }
 
-    /* 見出し */
-    h1 {
-      margin-bottom: 2rem;
-      font-size: 1.8rem;
-      color: #333;
-    }
+  /* 全体レイアウト：上寄せ & 中央揃え */
+  body {
+    margin: 0;
+    font-family: "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+    background: linear-gradient(145deg,#eaf5ff 0%,#d5eaff 100%);
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
 
-    /* ボタン共通スタイル */
-    .tool-btn {
-      display: inline-block;
-      width: 260px;
-      padding: 16px 24px;
-      margin: 10px;
-      font-size: 1rem;
-      font-weight: 600;
-      text-align: center;
-      color: #fff;
-      background: #007bff;
-      border-radius: 8px;
-      text-decoration: none;
-      transition: background .25s;
-      box-shadow: 0 4px 6px rgba(0,0,0,.1);
-    }
-    .tool-btn:hover {
-      background: #0056b3;
-    }
-  </style>
+  /* コンテナ（半透明カード） */
+  .panel {
+    margin-top: 60px;                /* 上部に余白 → “ヘッダー寄り” */
+    padding: 40px 60px 50px;
+    border-radius: 18px;
+    background: var(--glass-bg);
+    box-shadow: 0 8px 24px rgba(0,0,0,.12);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    text-align: center;
+  }
+
+  h1 {
+    margin: 0 0 30px;
+    font-size: 1.9rem;
+    font-weight: 600;
+    letter-spacing: .02em;
+  }
+
+  /* ボタン共通 */
+  .tool-btn {
+    display: block;
+    width: 280px;
+    max-width: 90vw;
+    margin: 12px auto;
+    padding: 15px 24px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #fff;
+    text-decoration: none;
+    background: var(--accent);
+    border: none;
+    border-radius: 12px;
+    box-shadow:
+      0 2px 4px rgba(0,0,0,.12),
+      0 6px 12px rgba(0,0,0,.08) inset;
+    transition: all .25s cubic-bezier(.4,.2,.3,1);
+  }
+  .tool-btn:hover {
+    background: var(--accent-h);
+    transform: translateY(-1px);
+    box-shadow:
+      0 4px 8px rgba(0,0,0,.15),
+      0 6px 14px rgba(0,0,0,.1) inset;
+  }
+  .tool-btn:active {
+    transform: translateY(0);
+    box-shadow:
+      0 2px 6px rgba(0,0,0,.12) inset;
+  }
+</style>
 </head>
 <body>
-  <h1>便利ツール</h1>
 
-  <!-- カンペ見開き変換 -->
-  <a class="tool-btn"
-     href="https://nkmrge.github.io/kanpePDF/kanpe-henkan.html"
-     target="_blank">
-     カンペ見開き変換
-  </a>
+  <!-- 半透明カード内にタイトル＋ボタン -->
+  <div class="panel">
+    <h1>便利ツール</h1>
 
-  <!-- PDF圧縮ツール -->
-  <a class="tool-btn"
-     href="https://nkmrge.github.io/PDFcompress"
-     target="_blank"
-     rel="noopener noreferrer">
-     PDF圧縮ツール
-  </a>
+    <a class="tool-btn"
+       href="https://nkmrge.github.io/kanpePDF/kanpe-henkan.html"
+       target="_blank"
+       rel="noopener noreferrer">
+       カンペ見開き変換
+    </a>
+
+    <a class="tool-btn"
+       href="https://nkmrge.github.io/PDFcompress"
+       target="_blank"
+       rel="noopener noreferrer">
+       PDF圧縮ツール
+    </a>
+  </div>
+
 </body>
 </html>
